@@ -10,11 +10,11 @@ Rev. 1.0 2021.12.21 - initial version(Korean)
 
 ------
 
-(원본인데 왜 디지털 풍화가 일어나지..)
 
-![그림1](https://ifh.cc/v5opyB.jpg)
 
-![그림2](https://ifh.cc/6FJilG.jpg)
+![그림1](https://ifh.cc/g/v5opyB.jpg)
+
+![그림2](https://ifh.cc/g/6FJilG.jpg)
 
 
 
