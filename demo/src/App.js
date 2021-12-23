@@ -1,25 +1,31 @@
-import logo from './logo.svg';
 import './App.css';
 
-function App() {
+import { Route, Redirect, Switch } from 'react-router-dom';
+import { ConnectedRouter } from 'connected-react-router';
+import { connect } from 'react-redux';
+
+import Main from './containers/Main/Main'; 
+import History from './containers/History/History/History';
+import HistoryDetail from './containers/History/HistoryDetail/HistoryDetail';
+
+function App(props) {
+  const { history } = props;
+  
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <ConnectedRouter history = {history}>
+        <Switch>
+          <Route path="/main" exact component={Main}/>
+          <Route path="/history" exact component={History}/>
+          <Route path="/history/:id" exact component={HistoryDetail}/>
+          <Redirect from="/" to ="/main" />
+        </Switch>
+      </ConnectedRouter>
     </div>
   );
 }
 
-export default App;
+export default connect(
+  mapStateToProps,
+  null,
+)(App);

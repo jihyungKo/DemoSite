@@ -11,6 +11,14 @@ ENV PATH /app/node_modules/.bin:$PATH
 
 # app dependencies, install 및 caching
 COPY demo/package.json /app/package.json
+
+# RUN npm cache clean --force
+# RUN npm config set registry http://registry.npmjs.org/
+
+# avoid CERT Error(proxy problem???)
+# 도커 CA 인증서
+RUN npm config set strict-ssl false
+
 RUN npm install
 RUN npm install react-scripts@5.0.0 -g
 

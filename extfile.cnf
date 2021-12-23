@@ -1,0 +1,2 @@
+subjectAltName = DNS:centgsk2, IP:100.100.100.3, IP:127.0.0.1
+extendedKeyUsage = serverAuth
