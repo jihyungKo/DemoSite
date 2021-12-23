@@ -30,21 +30,24 @@ https://app.diagrams.net/#G1Dvh32TNbkhtqPU3NheSOKRMMXdQyq0I9
 
 ------
 
+![페이지1](https://ifh.cc/g/QSOxuu.jpg)
+
+![페이지2](https://ifh.cc/g/ZetAVR.jpg)
+
+![페이지3](https://ifh.cc/g/8XRMGI.jpg)
+
 1. Main page(/main)
-
    - Show sample input and output on the upper side
-
+   
    - Upload Input, weight and label
    - Until the output is calculated, show wait sign
    - After the inference process, show output
    - When History button clicked, go to History page
-
 2. History page(/hist/all)
 
    - Show all Log links and Log summaries
    - When Log links are clicked, go to HistoryDetail page
    - When Home button clicked, go to Main page
-
 3. HistoryDetail page(/hist/:id)
 
    - Show input, weight_name, label and output of each Log
