@@ -1,5 +1,6 @@
 # base image
 FROM node:17.2.0
+# python 환경 추가
 
 # set working directory
 RUN mkdir -p /app
@@ -21,6 +22,12 @@ RUN npm config set strict-ssl false
 
 RUN npm install
 RUN npm install react-scripts@5.0.0 -g
+
+RUN pip3 install Flask
+# RUN pip3 install flask
+RUN pip3 install flask-restx
+RUN pip3 install SQLAchemy
+RUN pip3 install torchvision==0.10.0
 
 # 앱 실행
 CMD ["npm", "start"]
