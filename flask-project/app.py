@@ -1,7 +1,7 @@
 from flask import Flask, request  # 서버 구현을 위한 Flask 객체 import
 from flask_restx import Api, Resource  # Api 구현을 위한 Api 객체 import
 from werkzeug.utils import secure_filename
-from flask_sqlahcmey import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 
 
 # for pytorch
@@ -9,10 +9,8 @@ import io
 import torchvision.transforms as transforms
 from PIL import Image
 
-from lib.models.UNET2D import UNET2D
-from lib.models.UNET3D import UNET3D
-from lib.models.VNET import VNET
-from lib.models.VNET2 import VNET2
+import lib.inference as infer
+import lib.models as models
 
 import os
 
@@ -45,10 +43,19 @@ app.config['TRAINED_FOLDER_3D'] = TRAINED_FOLDER_3D
 class Log(db.Model):
     __table_name__ = 'log'
 
-    id = db.Column(db.Integer, primary_key=True)
-    output = db.Column(db.Photo(root="/path/output/", nullable=True))
-    loss = db.Colume(db.Float, nullable=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    status = db.Column(db.String(10))
+    output = db.Column(db.String(100))
+    loss = db.Column(db.Float, nullable=True)
     dice = db.Column(db.Float, nullable=True)
+
+    def __init__(self, status, output, loss, dice):
+        self.output = output
+        self.loss = loss
+        self.dice = dice
+
+    def __repr__(self):
+        return f"<Log('{self.id}', '{self.output}', '{self.loss}'. '{self.dice}')>"
 
 def allowed_file_2D(filename):
     return '.' in filename and \
@@ -123,36 +130,50 @@ def transform_image(image_bytes):
     image = Image.open(io.BytesIO(image_bytes))
     return my_transforms(image).unsqueeze(0)
 
+@app.route('/api/inference/<input_id>/<label_id>/<model_id>', methods=['POST'])
+def inference(input_id, label_id, model_id):
+    output = None
+    status = "Pending"
+    dice = 0
+    loss = 0
 
-# have to implement for user selection
-model = VNET
-model.eval()
+    dimension = '3D'
+    input_path = './path/uploads'+'{}'.format(dimension)+'/input/'+input_id+'.nii.gz'
+    label_path = './path/uploads'+'{}'.format(dimension)+'/label/'+label_id+'.nii.gz'
+    model_path = './path/uploads'+'{}'.format(dimension)+'/trained/'+model_id+'.pth'
 
-def get_inference(image_bytes):
-    tensor = transform_image(image_bytes=image_bytes)
-    outputs = model.forward(tensor)
-    _, y_
+    output_path = "./path/output/"+'{}'.format(dimension)+'/'
 
+    infer.execute(input_path, label_path, model_path, output_path)
+    db.session.add(Log(status, output, loss, dice))
+    return "Inference Success"
 
-@api.route('api/hist/all', methods=['GET'])
-def get(self):
-    return
+# def inference(): ~~~
 
-@app.route('api/hist/<log_id>', methods=['GET'])
+@app.route('/api/hist/all', methods=['GET'])
+def hist_get(self):
+    logs = Log.query.all()
+    
+    return "Get History All Success"
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return "404에러(Page_not_found)"
+
+@app.route('/api/hist/<log_id>', methods=['GET'])
 # HistoryDetail
-# now, 장고처럼 구현해놓음. have to fix it.
 def log(log_id):
     try:
-        log = Log.objects.get(pk=log_id)
-    except Log.DoesNotExist:
+        log_ = Log.query.filter(Log.id == log_id).all()
+    except DoesNotExist:
         #404
-        return HttpResponseNotFound()
+        return abort(404)
+    
     log_json = serializer.data
     return log_json
 
-
-@api.route('api/output', methods=['GET'])
-def get(self):
+@app.route('/api/output', methods=['GET'])
+def output_get(self):
     return
 
 if __name__ == "__main__":

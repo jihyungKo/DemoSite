@@ -6,13 +6,13 @@ from .Vnet import VNet, VNetLight
 
 model_list = ['UNET3D', "UNET2D", 'VNET', 'VNET2']
 
-def create_model(args):
-    model_name = args.model
+def create_model(model_name):
+    model_name = model_name
     assert model_name in model_list
-    optimizer_name = args.opt
-    lr = args.lr
-    in_channels = args.inChannels
-    num_classes = args.classes
+    optimizer_name = 'sgd'
+    lr = 1e-3
+    in_channels = 1
+    num_classes = 2
     weight_decay = 0.0000000001
     print("Building Model . . . . . . . ." + model_name)
 

@@ -1,5 +1,5 @@
-from lib.medloaders import medical_image_process as img_loader
-from lib.visual3D_temp import *
+from lib.loaders import medical_image_process as img_loader
+from lib.visual import *
 
 
 def get_viz_set(*ls, dataset_name, test_subject=0, save=False, sub_vol_path=None):
@@ -7,20 +7,16 @@ def get_viz_set(*ls, dataset_name, test_subject=0, save=False, sub_vol_path=None
     Returns total 3d input volumes (t1 and t2 or more) and segmentation maps
     3d total vol shape : torch.Size([1, 144, 192, 256])
     """
-    modalities = len(ls)
+    # modalities = len(ls)
     total_volumes = []
 
-    test_subject = 1
+    # path_img = ls[0]
+    img_tensor = img_loader.load_medical_image(ls[0], viz3d=True)
+    total_volumes.append(img_tensor)
 
-    for i in range(modalities):
-        path_img = ls[i][test_subject]
-        print("path: ", path_img)
-
-        img_tensor = img_loader.load_medical_image(path_img, viz3d=True)
-        if i == modalities - 1:
-            img_tensor = fix_seg_map(img_tensor, dataset=dataset_name)
-        
-        total_volumes.append(img_tensor)        
+    img_tensor = img_loader.load_medical_image(ls[1], viz3d=True)
+    img_tensor = fix_seg_map(img_tensor, dataset=dataset_name)
+    total_volumes.append(img_tensor)        
 
     if save:
         total_subvolumes = total_volumes[0].shape[0]
@@ -32,37 +28,8 @@ def get_viz_set(*ls, dataset_name, test_subject=0, save=False, sub_vol_path=None
     else:
         return torch.stack(total_volumes, dim=0)
 
-
 def fix_seg_map(segmentation_map, dataset="ctorg"):
-    if dataset == "iseg2017" or dataset == "iseg2019":
-        label_values = [0, 10, 150, 250]
-        for c, j in enumerate(label_values):
-            segmentation_map[segmentation_map == j] = c
-
-    elif dataset == "brats2018" or dataset == "brats2019" or dataset == "brats2020":
-        ED = 2
-        NCR = 1
-        NET_NCR = 1
-        ET = 3
-        segmentation_map[segmentation_map == 1] = NET_NCR
-        segmentation_map[segmentation_map == 2] = ED
-        segmentation_map[segmentation_map == 3] = 3
-        segmentation_map[segmentation_map == 4] = 3
-        segmentation_map[segmentation_map >= 4] = 3
-
-    elif dataset == "mrbrains4":
-        GM = 1
-        WM = 2
-        CSF = 3
-        segmentation_map[segmentation_map == 1] = GM
-        segmentation_map[segmentation_map == 2] = GM
-        segmentation_map[segmentation_map == 3] = WM
-        segmentation_map[segmentation_map == 4] = WM
-        segmentation_map[segmentation_map == 5] = CSF
-        segmentation_map[segmentation_map == 6] = CSF
-
-    elif dataset == "ctorg":
-        # print(segmentation_map)
+    if dataset == "ctorg":
         label_values = [0, 3]
 
         for c, j in enumerate(label_values):

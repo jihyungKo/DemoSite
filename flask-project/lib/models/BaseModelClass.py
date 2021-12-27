@@ -64,68 +64,6 @@ class BaseModel(nn.Module, ABC):
         # Return global step
         return ckpt_dict['epoch']
 
-    def save_checkpoint(self,
-                        directory,
-                        epoch, loss,
-                        optimizer=None,
-                        name=None):
-        r"""
-        Saves checkpoint at a certain global step during training. Optimizer state
-        is also saved together.
-
-        Args:
-            directory (str): Path to save checkpoint to.
-            epoch (int): The training. epoch
-            optimizer (Optimizer): Optimizer state to be saved concurrently.
-            name (str): The name to save the checkpoint file as.
-
-        Returns:
-            None
-        """
-        # Create directory to save to
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        # Build checkpoint dict to save.
-        ckpt_dict = {
-            'model_state_dict':
-                self.state_dict(),
-            'optimizer_state_dict':
-                optimizer.state_dict() if optimizer is not None else None,
-            'epoch':
-                epoch
-        }
-
-        # Save the file with specific name
-        if name is None:
-            name = "{}_{}_epoch.pth".format(
-                os.path.basename(directory),  # netD or netG
-                'last')
-
-        torch.save(ckpt_dict, os.path.join(directory, name))
-        if self.best_loss > loss:
-            self.best_loss = loss
-            name = "{}_BEST.pth".format(
-                os.path.basename(directory))
-            torch.save(ckpt_dict, os.path.join(directory, name))
-
-    def count_params(self):
-        r"""
-        Computes the number of parameters in this model.
-
-        Args: None
-
-        Returns:
-            int: Total number of weight parameters for this model.
-            int: Total number of trainable parameters for this model.
-
-        """
-        num_total_params = sum(p.numel() for p in self.parameters())
-        num_trainable_params = sum(p.numel() for p in self.parameters()
-                                   if p.requires_grad)
-
-        return num_total_params, num_trainable_params
-
     def inference(self, input_tensor):
         self.eval()
         with torch.no_grad():

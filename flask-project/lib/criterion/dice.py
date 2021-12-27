@@ -1,7 +1,6 @@
-from lib.losses3D.BaseClass import _AbstractDiceLoss
-from lib.losses3D.basic import *
+from lib.criterion.BaseClass import _AbstractDiceLoss
+from lib.criterion.basic import *
 # Code was adapted and mofified from https://github.com/wolny/pytorch-3dunet/blob/master/pytorch3dunet/unet3d/losses.py
-
 
 class DiceLoss(_AbstractDiceLoss):
     """Computes Dice Loss according to https://arxiv.org/abs/1606.04797.

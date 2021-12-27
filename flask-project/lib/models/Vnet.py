@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-from lib.medzoo.BaseModelClass import BaseModel
+from lib.models.BaseModelClass import BaseModel
 
 def passthrough(x, **kwargs):
     return x

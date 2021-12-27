@@ -4,8 +4,6 @@ import nibabel as nib
 from numpy.core.numeric import full
 import torch
 import torch.nn.functional as F
-from lib.losses3D.basic import *
-
 from .viz_2d import *
 
 def test_padding():
@@ -104,7 +102,7 @@ def non_overlap_padding(args, full_volume, model,criterion, kernel_dim=(32, 32, 
     return loss_dice
 
 
-def visualize_3D_no_overlap_new(args, full_volume, affine, model, epoch, dim):
+def visualize_3D_no_overlap_new(output_path, model_name, dataset_name, full_volume, affine, model, epoch, dim):
     """
     this function will produce NON-overlaping  sub-volumes prediction
     that produces full 3d medical image
@@ -113,13 +111,11 @@ def visualize_3D_no_overlap_new(args, full_volume, affine, model, epoch, dim):
     :param dim: (d1,d2,d3))
     :return: 3d reconstructed volume
     """
-    classes = args.classes
+    classes = 2
     modalities, slices, height, width = full_volume.shape
     full_volume_dim = (slices, height, width)
-    # dim = full_volume_dim
 
     print("full volume dim=", full_volume_dim, 'crop dim', dim)
-    #desired_dim = find_crop_dims(full_volume_dim, dim)
     desired_dim = dim
     print("Inference dims=", desired_dim)
 
@@ -153,7 +149,6 @@ def visualize_3D_no_overlap_new(args, full_volume, affine, model, epoch, dim):
 
     print(len(predictions))
     print(a,b,c)
-
 
     # project back to full volume
     for i in range(a):
@@ -191,16 +186,16 @@ def visualize_3D_no_overlap_new(args, full_volume, affine, model, epoch, dim):
     segment_map = segment_map[:,:,:z_size]
 
     # TODO TEST...................
-    save_path_2d_fig = args.save + '/' + 'epoch__' + str(epoch).zfill(4) + '.png'
+    save_args = output_path
+    save_path_2d_fig = save_args+ '/' + 'epoch__' + str(epoch).zfill(4) + '.png'
     create_2d_views(full_vol_predictions, segment_map, save_path_2d_fig)
 
-    save_path = args.save + '/Pred_volume_epoch_' + str(epoch)
+    save_path = save_args + '/Pred_volume_epoch_' + str(epoch)
     save_3d_vol(full_vol_predictions.numpy().astype(np.float32), affine, save_path)
     print("pred    :    " , full_vol_predictions.numpy().shape)
 
-    save_path = args.save + '/answer_label'
+    save_path = save_args + '/answer_label'
     save_3d_vol(segment_map.numpy().astype(np.float32), affine, save_path)
-
 
 # TODO TEST
 def create_3d_subvol(full_volume, dim):

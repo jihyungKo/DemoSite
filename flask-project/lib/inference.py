@@ -4,46 +4,54 @@ import sys
 
 import torch
 import torch.nn.functional as F
+import numpy as np
+import torch.backends.cudnn as cudnn
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
-# Lib files
-import lib.utils as utils
-import lib.medloaders as medical_loaders
+import lib.loaders as medical_loaders
 import lib.models as models
 from lib.visual import visualize_3D_no_overlap_new
 from lib.criterion import DiceLoss
 
 from lib.loaders import medical_image_process as img_loader
-#
 
-def main():
-    args = get_arguments()
+def execute(input_path, label_path, model_path, output_path):
+    print("inference 접근")
     seed = 1777777
-    utils.reproducibility(args, seed)
+    torch.manual_seed(seed)
+    # if args.cuda:
+    #     torch.cuda.manual_seed(seed)
+    np.random.seed(seed)
+    cudnn.deterministic = True
+    cudnn.benchmark = True
 
-    full_volume, affine = medical_loaders.select_full_volume_for_infer(args,
-                                                                        path='./datasets')
-    model, optimizer = models.create_model(args)
-    criterion = DiceLoss(classes=args.classes)
+    dataset_name = "ctorg"
+    full_volume, affine = medical_loaders.select_full_volume_for_infer(dataset_name, input_path, label_path, model_path)
+    # VNET, UNET3D, UNET2D
+    model_name = "VNET"
+    model, optimizer = models.create_model(model_name)
+    criterion = DiceLoss(classes=2)
     
     # ## TODO LOAD PRETRAINED MODEL
     print("affine   :   ", affine.shape)
     # no affine
-    model.restore_checkpoint(args.pretrained)
-    
+    pretrained = model_path0
+    model.restore_checkpoint(pretrained)
+   
+    '''
     if args.cuda:
         model = model.cuda()
         full_volume = full_volume.cuda()
         print("Model transferred in GPU.....")
+    '''
     
-    print("full   :   ", full_volume.shape)
-
-    a,b,c,d = full_volume.shape
-    visualize_3D_no_overlap_new(args, full_volume, affine, model, 10, args.dim)
-
-    ## TODO TARGET FOR LOSS
-
+    # print("full   :   ", full_volume.shape)
+    # a,b,c,d = full_volume.shape
+    dim = (32,32,32)
+    visualize_3D_no_overlap_new(output_path, model_name, dataset_name, full_volume, affine, model, 10, dim)
+    
+'''
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--loadData', default=True)
@@ -82,9 +90,7 @@ def get_arguments():
 
     import os
     #os.makedirs('../inference_checkpoints/' + args.model + '_checkpoints/' + args.model + '_{}_{}_'.format(utils.datestr(), args.dataset_name))
-    #args.save = '../inference_checkpoints/' + args.model + '_checkpoints/' + args.model + '_{}_{}_'.format(utils.datestr(), args.dataset_name)
+    # args.save = 
     #args.tb_log_dir = '../runs/'
     return args
-
-if __name__ == '__main__':
-    main()
+'''
